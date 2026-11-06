@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onnet Link</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1c1c1e; }
+  iframe { border: 0; width: 100%; height: 100%; display: block; }
+  #aviso { color: #ddd; font-family: Arial, sans-serif; padding: 24px; }
+  #aviso a { color: #7aa7ff; }
+</style>
+</head>
+<body>
+<div id="aviso">Cargando Onnet Link… si no aparece, <a id="enlace" href="#" target="_top">ábrela aquí</a>.</div>
+<iframe id="app" allow="clipboard-write" hidden></iframe>
+<script>
+  // URL de la app en Apps Script (sin ?k= ni ?r=; esos llegan desde la barra de esta página)
+  var EXEC = 'https://script.google.com/macros/s/AKfycbzGfPt-EaqkydjQr6KVzxhhNNZR2p1kuYqN-_m0xxX37kFq8_kww2ezN0KMAL7ghSJN/exec';
+  var destino = EXEC + location.search;
+  document.getElementById('enlace').href = destino;
+  var f = document.getElementById('app');
+  f.src = destino;
+  f.hidden = false;
+  f.onload = function () { document.getElementById('aviso').hidden = true; };
+</script>
+</body>
+</html>
