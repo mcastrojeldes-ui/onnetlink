@@ -3,7 +3,7 @@
 <head>
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.09-073 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.09-074 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -222,14 +222,14 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.09-073 · 09-11-2026 10:10</div>
+        <div class="sub" id="ver">Versión 2026.11.09-074 · 09-11-2026 13:10</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
     </div></div>
     <div class="barra-blanca"><div class="in">
       <div class="seg oculto" id="tabs"></div>
-      <label class="buscar"><span aria-hidden="true">🔍</span><input id="q" type="search" inputmode="search" placeholder="Buscar SOLOT, cliente o dirección" autocomplete="off">
+      <label class="buscar"><span aria-hidden="true">🔍</span><input id="q" type="search" inputmode="search" placeholder="Buscar SOLOT, QUOL, cliente o dirección" autocomplete="off">
         <button type="button" class="x oculto" id="qx" aria-label="Borrar búsqueda">×</button></label>
     </div></div>
   </div>
@@ -439,7 +439,7 @@
         p.dias = fObs ? diasEntre(fObs, REFERENCIA) : (respaldoEstado && fEst && !p.estadoDesdeRegistro ? p.diasEstado : null);
         p.sinMov = !p.cerrado && (p.dias === null || p.dias > DIAS_ALERTA);
         p.urg = p.cerrado ? -1 : (p.dias === null ? 9999 : p.dias);
-        p.busca = sinTildes([p.solot, p.cliente, p.direccion, p.comuna, p.pmClaro, p.solicitud, p.servicio].join(' '));
+        p.busca = sinTildes([p.solot, p.cotizacion, p.cliente, p.direccion, p.comuna, p.pmClaro, p.solicitud, p.servicio].join(' '));
       });
     }
     preparar(FUENTES.onnet.lista, 'det', false);
