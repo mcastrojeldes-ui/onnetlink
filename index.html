@@ -3,7 +3,7 @@
 <head>
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.06-069 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.06-070 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -347,15 +347,15 @@
     var toastT = null;
     function toast(t) { var e = document.getElementById('toast'); e.textContent = t; e.classList.add('ver'); clearTimeout(toastT); toastT = setTimeout(function () { e.classList.remove('ver'); }, 2500); }
 
-    // v065: nombres de estado en formato nombre propio (cada palabra con mayúscula inicial, conectores en minúscula,
+    // v065/v070: nombres de estado en formato nombre propio (cada palabra con mayúscula inicial, conectores en minúscula,
     // siglas como ONF, PM, OC u OT tal cual). Ej.: "Detenido - cliente en construccion" → "Detenido - Cliente en Construccion".
     var CONECTORES_EST = ['de', 'del', 'a', 'al', 'en', 'la', 'las', 'el', 'los', 'y', 'e', 'o', 'por', 'para', 'con', 'sin'];
     function tituloEstado(t) {
-      var i = 0;
-      return String(t || '').replace(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g, function (w) {
-        var primera = i++ === 0;
+      return String(t || '').replace(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+/g, function (w, pos, todo) {
+        var primera = pos === 0 || /[-–]\s*$/.test(todo.slice(0, pos));   // v070: también la primera palabra después de "Detenido - "
         if (w.length > 1 && w === w.toUpperCase()) return w;                       // sigla
         var lw = w.toLowerCase();
+        if (lw === 'onf' || lw === 'pm' || lw === 'oc' || lw === 'ot') return w.toUpperCase();   // v070: siglas aunque lleguen en minúscula
         if (!primera && CONECTORES_EST.indexOf(lw) >= 0) return lw;
         return lw.charAt(0).toUpperCase() + lw.slice(1);
       });
