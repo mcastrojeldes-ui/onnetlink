@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com">
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.09-074 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-080 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -222,7 +224,7 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.09-074 · 09-11-2026 13:10</div>
+        <div class="sub" id="ver">Versión 2026.11.16-080 · 16-11-2026 13:55</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
@@ -276,11 +278,16 @@
       var qs = new URLSearchParams(location.search);
       var tk = (qs.get('r') || '').trim(), kk = (qs.get('k') || '').trim(), pp = (qs.get('p') || '').trim();
       if (!tk) { caja('Acceso no autorizado', 'Esta dirección es de uso interno. Si recibiste un link de reporte, ábrelo completo tal como llegó.'); return; }
+      // v080: si la respuesta tarda más de 8 s se avisa que sigue preparándose; el tiempo máximo sube de 40 a 90 s.
+      var aviso = setTimeout(function () {
+        var c = document.getElementById('cargando');
+        if (c) c.textContent = 'Preparando tu reporte… esta vez puede tardar unos segundos más.';
+      }, 8000);
       var espera = setTimeout(function () {
         caja('El reporte tardó demasiado', 'No se pudo cargar a tiempo. Revisa tu conexión y vuelve a abrir el link.');
-      }, 40000);
+      }, 90000);
       window.onnetDatos = function (resp) {
-        clearTimeout(espera);
+        clearTimeout(espera); clearTimeout(aviso);
         if (!resp || resp.error || !resp.datos) {
           var e = (resp && resp.error) || {};
           caja(e.titulo || 'No se pudo cargar el reporte', e.texto || 'Intenta de nuevo en un minuto.', resp && resp.logo);
@@ -294,7 +301,7 @@
       var s = document.createElement('script');
       s.src = EXEC + '?r=' + encodeURIComponent(tk) + '&datos=1' + (kk ? '&k=' + encodeURIComponent(kk) : '') + (pp ? '&p=' + encodeURIComponent(pp) : '') + '&t=' + Date.now();
       s.onerror = function () {
-        clearTimeout(espera);
+        clearTimeout(espera); clearTimeout(aviso);
         caja('No se pudo cargar el reporte', 'Revisa tu conexión y vuelve a abrir el link. Si sigue igual, avisa a quien te lo envió.');
       };
       document.head.appendChild(s);
@@ -344,7 +351,9 @@
     function aFecha(t) { var m = /^(\d{2})-(\d{2})-(\d{4})/.exec(t || ''); return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null; }
     function diasEntre(a, b) { return Math.max(0, Math.round((b - a) / 86400000)); }
     function plural(n, s, p) { return n === 1 ? s : p; }
-    var REFERENCIA = aFecha(DATOS.ultimaCarga) || new Date();
+    // v080: los días sin movimiento y "en el estado hace N días" se cuentan desde HOY (fecha real del dispositivo), no desde la fecha de la
+    // última carga: antes una observación del día de la carga seguía diciendo "hoy" días después (decisión de Marco, 16-11).
+    var REFERENCIA = (function () { var h = new Date(); return new Date(h.getFullYear(), h.getMonth(), h.getDate()); })();
     var toastT = null;
     function toast(t) { var e = document.getElementById('toast'); e.textContent = t; e.classList.add('ver'); clearTimeout(toastT); toastT = setTimeout(function () { e.classList.remove('ver'); }, 2500); }
 
