@@ -5,7 +5,7 @@
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-082 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-083 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -224,7 +224,7 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.16-082 · 16-11-2026 16:12</div>
+        <div class="sub" id="ver">Versión 2026.11.16-083 · 16-11-2026 16:24</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
@@ -634,7 +634,13 @@
       var mapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.mapaQ || (p.direccion + ', Chile'));
       var estTxt = p.diasEstado === null ? '' : 'en el estado hace ' + p.diasEstado + ' ' + plural(p.diasEstado, 'día', 'días') +
         (p.estadoDesdeRegistro ? ' (registro desde ' + esc((p.estadoDesde || '').slice(0, 5)) + ')' : ' (desde ' + esc((p.estadoDesde || '').slice(0, 5)) + ')');
-      var datos = F().campos.map(function (c) {
+      // v083: VLAN y OC (solo Onnet). Si el estado es Construcción y falta alguno, se marca como pendiente.
+      var vlanOc = fuente !== 'onnet' ? '' : [['vlan', 'VLAN'], ['oc', 'OC']].map(function (c) {
+        var falta = !p[c[0]] && p.pideVlanOc;
+        return '<div><div class="l">' + c[1] + '</div><div class="v"' + (falta ? ' style="color:#D93025;font-weight:700"' : '') + '>' +
+          (p[c[0]] ? esc(p[c[0]]) : falta ? 'Pendiente' : '—') + '</div></div>';
+      }).join('');
+      var datos = vlanOc + F().campos.map(function (c) {
         return '<div><div class="l">' + c[1] + '</div><div class="v">' + (p[c[0]] ? esc(p[c[0]]) : '—') + '</div></div>';
       }).join('') + (LIDER ? '<div><div class="l">PM Claro VTR</div><div class="v">' + esc(p.pmClaro) + '</div></div>' : '');
       var h = p.historial || [];
