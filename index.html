@@ -5,7 +5,7 @@
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-080 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-082 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -224,7 +224,7 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.16-080 · 16-11-2026 13:55</div>
+        <div class="sub" id="ver">Versión 2026.11.16-082 · 16-11-2026 16:12</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
@@ -695,7 +695,12 @@
       vis.forEach(function (p) { (porG[p.grupo] = porG[p.grupo] || []).push(p); });
       Object.keys(porG).forEach(function (g) { if (orden.indexOf(g) < 0) orden = orden.concat([g]); });
       cont.innerHTML = orden.filter(function (g) { return porG[g]; }).map(function (g) {
-        var l = porG[g].sort(function (a, b) { return b.urg - a.urg || String(a.solot).localeCompare(String(b.solot), 'es', { numeric: true }); });
+        // v082: las cerradas van de la más reciente a la más antigua (menos días a más días); sin días al final. El resto sigue por urgencia.
+        var l = porG[g].sort(function (a, b) {
+          var porSolot = String(a.solot).localeCompare(String(b.solot), 'es', { numeric: true });
+          if (g === 'cer') return (a.dias === null ? 1e9 : a.dias) - (b.dias === null ? 1e9 : b.dias) || porSolot;
+          return b.urg - a.urg || porSolot;
+        });
         return '<div class="gcab"><span class="nm"><i style="background:' + (COLOR[g] || COLOR.otr) + '"></i>' + esc(F().nombres[g] || (g === 'cer' ? 'Cerrados' : g)) + '</span><span>' + l.length + '</span></div>' +
           l.map(filaHtml).join('');
       }).join('');
