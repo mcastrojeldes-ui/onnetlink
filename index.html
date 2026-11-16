@@ -5,7 +5,7 @@
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-083 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-094 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -166,6 +166,9 @@
     .datos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; margin-bottom: 10px; }
     .datos .l { font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--gris); font-weight: 700; }
     .datos .v { font-size: 14px; overflow-wrap: anywhere; }
+    .blq { margin: 0 0 12px; }
+    .blq .bt { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--rojo-osc); font-weight: 700; margin: 0 0 7px; padding-bottom: 3px; border-bottom: 1px solid var(--linea); }
+    .blq .datos { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 0; }
     .h-tit { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--rojo-osc); font-weight: 700; margin: 4px 0 6px; }
     .tl { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--linea); }
     .tl li { position: relative; padding: 0 0 9px 4px; font-size: 14px; }
@@ -211,6 +214,8 @@
       .fila .pc .pe { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
       .det { padding-left: 31px; }
       .datos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .blq .datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .blq .datos.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .det .dos { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 22px; }
       .cifra span { font-size: 11px; }
     }
@@ -224,7 +229,7 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.16-083 · 16-11-2026 16:24</div>
+        <div class="sub" id="ver">Versión 2026.11.16-094 · 16-11-2026 19:35</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
@@ -321,13 +326,19 @@
     var FUENTES = {
       onnet: { tab: 'Onnet', lista: DATOS.proyectos || [], nombres: DATOS.grupos || {}, orden: ['det', 'coo', 'onf', 'pro', 'otr'], urgente: 'det',
                estado: 'Estado ONF',
-               campos: [['pmOnf', 'PM ONF'], ['cotizacion', 'Cotización ONF'], ['ot', 'OT enviada ONF'], ['fechaOc', 'Fecha envío OC'],
-                        ['fechaEntrega', 'Fecha entrega ONF'], ['servicio', 'N° de servicio'], ['solotEstado', 'SOLOT estado'],
-                        ['proyeccion', 'Proyección'], ['torre', 'Torre']] },
+               // v094: cada campo lleva el bloque donde se muestra en el detalle (VLAN y OC se agregan solos a "Red y compra").
+               bloques: ['Red y compra', 'Fechas', 'Servicio', 'Responsables'],
+               campos: [['cotizacion', 'Cotización ONF', 'Red y compra'], ['ot', 'OT enviada ONF', 'Red y compra'],
+                        ['fechaOc', 'Fecha envío OC', 'Fechas'], ['fechaEntrega', 'Fecha entrega ONF', 'Fechas'], ['proyeccion', 'Proyección', 'Fechas'],
+                        ['servicio', 'N° de servicio', 'Servicio'], ['solotEstado', 'SOLOT estado', 'Servicio'], ['torre', 'Torre', 'Servicio'],
+                        ['pmOnf', 'PM ONF', 'Responsables']] },
       reg: { tab: 'Solot', lista: DATOS.regulares || [], nombres: DATOS.gruposReg || {}, orden: ['rev', 'fac', 'goc', 'eje', 'ejd', 'otr'], urgente: 'rev',
              estado: 'Estado SGA',
-             campos: [['pmOnf', 'Proveedor'], ['solicitud', 'Tarea'], ['ot', 'OC Claro'], ['fechaOc', 'Fecha OC'], ['fechaEntrega', 'Fecha entrega tercero'],
-                      ['solotEstado', 'Descripción'], ['proyeccion', 'Medio físico'], ['cotizacion', 'Cód. servicio proveedor'], ['servicio', 'N° de servicio'], ['torre', 'Torre']] }
+             bloques: ['Compra', 'Fechas', 'Servicio', 'Responsables'],
+             campos: [['solicitud', 'Tarea', 'Compra'], ['ot', 'OC Claro', 'Compra'], ['cotizacion', 'Cód. servicio proveedor', 'Compra'],
+                      ['fechaOc', 'Fecha OC', 'Fechas'], ['fechaEntrega', 'Fecha entrega tercero', 'Fechas'],
+                      ['solotEstado', 'Descripción', 'Servicio'], ['proyeccion', 'Medio físico', 'Servicio'], ['servicio', 'N° de servicio', 'Servicio'], ['torre', 'Torre', 'Servicio'],
+                      ['pmOnf', 'Proveedor', 'Responsables']] }
     };
     var HAY_REG = Array.isArray(DATOS.regulares);
 
@@ -635,14 +646,18 @@
       var estTxt = p.diasEstado === null ? '' : 'en el estado hace ' + p.diasEstado + ' ' + plural(p.diasEstado, 'día', 'días') +
         (p.estadoDesdeRegistro ? ' (registro desde ' + esc((p.estadoDesde || '').slice(0, 5)) + ')' : ' (desde ' + esc((p.estadoDesde || '').slice(0, 5)) + ')');
       // v083: VLAN y OC (solo Onnet). Si el estado es Construcción y falta alguno, se marca como pendiente.
-      var vlanOc = fuente !== 'onnet' ? '' : [['vlan', 'VLAN'], ['oc', 'OC']].map(function (c) {
-        var falta = !p[c[0]] && p.pideVlanOc;
-        return '<div><div class="l">' + c[1] + '</div><div class="v"' + (falta ? ' style="color:#D93025;font-weight:700"' : '') + '>' +
-          (p[c[0]] ? esc(p[c[0]]) : falta ? 'Pendiente' : '—') + '</div></div>';
+      // v094: los datos van en bloques con título (Red y compra · Fechas · Servicio · Responsables).
+      var grupos = {};
+      var poner = function (bloque, rotulo, valor, falta) {
+        (grupos[bloque] = grupos[bloque] || []).push('<div><div class="l">' + rotulo + '</div><div class="v"' + (falta ? ' style="color:#D93025;font-weight:700"' : '') + '>' +
+          (valor ? esc(valor) : falta ? 'Pendiente' : '—') + '</div></div>');
+      };
+      if (fuente === 'onnet') [['vlan', 'VLAN'], ['oc', 'OC']].forEach(function (c) { poner('Red y compra', c[1], p[c[0]], !p[c[0]] && p.pideVlanOc); });
+      if (LIDER) poner('Responsables', 'PM Claro VTR', p.pmClaro);
+      F().campos.forEach(function (c) { poner(c[2], c[1], p[c[0]]); });
+      var datos = F().bloques.filter(function (b) { return grupos[b]; }).map(function (b) {
+        return '<div class="blq"><div class="bt">' + b + '</div><div class="datos' + (grupos[b].length === 3 ? ' n3' : '') + '">' + grupos[b].join('') + '</div></div>';
       }).join('');
-      var datos = vlanOc + F().campos.map(function (c) {
-        return '<div><div class="l">' + c[1] + '</div><div class="v">' + (p[c[0]] ? esc(p[c[0]]) : '—') + '</div></div>';
-      }).join('') + (LIDER ? '<div><div class="l">PM Claro VTR</div><div class="v">' + esc(p.pmClaro) + '</div></div>' : '');
       var h = p.historial || [];
       var todo = !!histCompleto[p.id], lim = 6;
       var hist = h.length ? '<ul class="tl">' + (todo ? h : h.slice(0, lim)).map(function (x, i) {
@@ -664,7 +679,7 @@
         '<div class="dir">' + esc(p.direccion || 'Sin dirección') + '</div>' +
         '<div class="acc"><a href="' + mapa + '" target="_blank" rel="noopener">📍 Mapa</a>' +
           '<button type="button" data-copiar="' + esc(p.solot) + '">⧉ Copiar SOLOT</button></div>' +
-        '<div class="dos"><div><div class="datos">' + datos + '</div></div>' +
+        '<div class="dos"><div>' + datos + '</div>' +
         '<div><div class="h-tit">Historial</div>' + hist + '</div></div>' +
         '<button type="button" class="cerrar" data-cerrar="' + esc(p.id) + '">Cerrar ▲</button></div>';
     }
