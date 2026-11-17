@@ -5,7 +5,7 @@
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <base target="_blank">
   <meta charset="utf-8">
-  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.16-094 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
+  <!-- Onnet Link · index.html (GitHub Pages) · Versión 2026.11.17-097 · reporte independiente: los datos llegan desde Apps Script (JSONP) -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Onnet Link</title>
@@ -229,7 +229,7 @@
         <div class="eyebrow" id="eyebrow">Onnet Link</div>
         <div class="nombre" id="nombre"></div>
         <div class="sub" id="sub"></div>
-        <div class="sub" id="ver">Versión 2026.11.16-094 · 16-11-2026 19:35</div>
+        <div class="sub" id="ver">Versión 2026.11.17-097 · 17-11-2026 13:40</div>
       </div>
       <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo claro u oscuro"></button>
       <img class="logo-marca" id="imgLogo" alt="Claro | vtr" style="visibility:hidden">
@@ -678,7 +678,8 @@
           '<span style="color:var(--gris)">' + esc(F().estado) + (estTxt ? ' · ' + estTxt : '') + '</span></div>' +
         '<div class="dir">' + esc(p.direccion || 'Sin dirección') + '</div>' +
         '<div class="acc"><a href="' + mapa + '" target="_blank" rel="noopener">📍 Mapa</a>' +
-          '<button type="button" data-copiar="' + esc(p.solot) + '">⧉ Copiar SOLOT</button></div>' +
+          '<button type="button" data-copiar="' + esc(p.solot) + '">⧉ Copiar SOLOT</button>' +
+          '<button type="button" data-ficha="' + esc(p.id) + '">⧉ Copiar ficha</button></div>' +
         '<div class="dos"><div>' + datos + '</div>' +
         '<div><div class="h-tit">Historial</div>' + hist + '</div></div>' +
         '<button type="button" class="cerrar" data-cerrar="' + esc(p.id) + '">Cerrar ▲</button></div>';
@@ -743,16 +744,29 @@
           if (f) window.scrollTo({ top: Math.max(0, f.getBoundingClientRect().top + window.scrollY - 120), behavior: 'smooth' });
         };
       });
+      Array.prototype.forEach.call(cont.querySelectorAll('[data-ficha]'), function (el) {
+        el.onclick = function (e) { e.stopPropagation(); var q = porId(el.getAttribute('data-ficha')); if (q) copiarFicha(q); };
+      });
       Array.prototype.forEach.call(cont.querySelectorAll('[data-copiar]'), function (el) {
         el.onclick = function (e) { e.stopPropagation(); copiar(el.getAttribute('data-copiar')); };
       });
       Array.prototype.forEach.call(cont.querySelectorAll('.det'), function (el) { el.onclick = function (e) { e.stopPropagation(); }; });
     }
 
-    function copiar(t) {
-      var listo = function () { toast('SOLOT ' + t + ' copiada'); };
+    function copiar(t, msg) {
+      var listo = function () { toast(msg || ('SOLOT ' + t + ' copiada')); };
       if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(listo, function () { respaldo(t); listo(); }); }
       else { respaldo(t); listo(); }
+    }
+    function porId(id) { var l = F().lista; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
+    // v097: ficha en texto simple (sirve igual en WhatsApp y en correo): SOLOT, cliente, dirección, región, comuna y mapa.
+    function copiarFicha(p) {
+      var url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.mapaQ || (p.direccion + ', Chile'));
+      var t = ['SOLOT ' + p.solot, 'Cliente: ' + (p.cliente || '—'), 'Dirección: ' + (p.direccion || '—')];
+      if (p.region) t.push('Región: ' + p.region);
+      if (p.comuna) t.push('Comuna: ' + p.comuna);
+      t.push('Mapa: ' + url);
+      copiar(t.join('\n'), 'Ficha de la SOLOT ' + p.solot + ' copiada. Pégala en WhatsApp o en el correo.');
     }
     function respaldo(t) {
       var a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0';
